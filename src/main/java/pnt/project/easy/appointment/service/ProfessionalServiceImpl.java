@@ -1,11 +1,10 @@
-package pnt.project.easy.appointment.service.impl;
+package pnt.project.easy.appointment.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import pnt.project.easy.appointment.entity.Professional;
+import pnt.project.easy.appointment.model.Professional;
 import pnt.project.easy.appointment.repository.ProfessionalRepository;
-import pnt.project.easy.appointment.service.ProfessionalService;
 
 
 @Service

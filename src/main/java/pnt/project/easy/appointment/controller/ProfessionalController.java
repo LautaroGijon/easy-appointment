@@ -4,8 +4,9 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import pnt.project.easy.appointment.entity.Professional;
+import pnt.project.easy.appointment.model.Professional;
 import pnt.project.easy.appointment.service.ProfessionalService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/professionals")
@@ -18,7 +19,7 @@ public class ProfessionalController {
     }
 
     @PostMapping
-    public Professional create(@RequestBody Professional professional) {
+    public Professional create(@Valid @RequestBody Professional professional) {
         return professionalService.create(professional);
     }
 

@@ -1,10 +1,10 @@
-package pnt.project.easy.appointment.entity;
+package pnt.project.easy.appointment.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 import jakarta.persistence.*;
-import pnt.project.easy.appointment.entity.enums.AppointmentStatus;
+import pnt.project.easy.appointment.model.enums.AppointmentStatus;
 
 @Entity
 @Table(name = "appointments")
@@ -29,8 +29,6 @@ public class Appointment {
     
     @ManyToOne
     @JoinColumn(name = "professional_id", nullable = false)
-    
-    
     private Professional professional;
 
     public Appointment() {
@@ -70,5 +68,13 @@ public class Appointment {
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+    
+    public Professional getProfessional() {
+        return professional;
+    }
+
+    public void setProfessional(Professional professional) {
+        this.professional = professional;
     }
 }

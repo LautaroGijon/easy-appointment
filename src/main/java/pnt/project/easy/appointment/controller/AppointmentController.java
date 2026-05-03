@@ -1,10 +1,12 @@
 package pnt.project.easy.appointment.controller;
 
-import java.util.List;
+import java.util.List;import pnt.project.easy.appointment.body.AppointmentUpdateRequest;
 
+import pnt.project.easy.appointment.body.AppointmentCreateRequest;
+import pnt.project.easy.appointment.model.Appointment;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import pnt.project.easy.appointment.entity.Appointment;
 import pnt.project.easy.appointment.service.AppointmentService;
 
 @RestController
@@ -23,8 +25,8 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public Appointment create(@RequestBody Appointment appointment) {
-        return appointmentService.create(appointment);
+    public Appointment create(@Valid @RequestBody AppointmentCreateRequest request) {
+        return appointmentService.create(request);
     }
     
     @PutMapping("/{id}/cancel")
@@ -33,11 +35,23 @@ public class AppointmentController {
     }
     
     
+    @GetMapping("/{id}")
+    public Appointment getById(@PathVariable Long id) {
+        return appointmentService.getById(id);
+    }
     
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        appointmentService.delete(id);
+    }
     
-    
-    
-    
+    @PutMapping("/{id}")
+    public Appointment update(
+            @PathVariable Long id,
+            @Valid @RequestBody AppointmentUpdateRequest request) {
+
+        return appointmentService.update(id, request);
+    }
     
     
     
