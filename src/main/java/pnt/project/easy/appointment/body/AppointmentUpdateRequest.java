@@ -3,13 +3,9 @@ package pnt.project.easy.appointment.body;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class AppointmentUpdateRequest {
-
-    @NotBlank(message = "Client name is required")
-    private String clientName;
 
     @NotNull(message = "Date is required")
     private LocalDate date;
@@ -19,16 +15,11 @@ public class AppointmentUpdateRequest {
 
     @NotNull(message = "Professional id is required")
     private Long professionalId;
+    
+    @NotNull(message = "Service id is required")
+    private Long serviceId;
 
     public AppointmentUpdateRequest() {
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
     }
 
     public LocalDate getDate() {
@@ -53,5 +44,13 @@ public class AppointmentUpdateRequest {
 
     public void setProfessionalId(Long professionalId) {
         this.professionalId = professionalId;
+    }
+    
+    public Long getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
     }
 }

@@ -14,8 +14,9 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String clientName;
+    @ManyToOne
+    @JoinColumn(name = "client_id", nullable = false)
+    private User client;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -26,10 +27,14 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status;
-    
+
     @ManyToOne
     @JoinColumn(name = "professional_id", nullable = false)
     private Professional professional;
+    
+    @ManyToOne
+    @JoinColumn(name = "service_id", nullable = false)
+    private OfferedService offeredService;
 
     public Appointment() {
     }
@@ -38,12 +43,12 @@ public class Appointment {
         return id;
     }
 
-    public String getClientName() {
-        return clientName;
+    public User getClient() {
+        return client;
     }
 
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
+    public void setClient(User client) {
+        this.client = client;
     }
 
     public LocalDate getDate() {
@@ -69,7 +74,7 @@ public class Appointment {
     public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
-    
+
     public Professional getProfessional() {
         return professional;
     }
@@ -77,4 +82,14 @@ public class Appointment {
     public void setProfessional(Professional professional) {
         this.professional = professional;
     }
+    
+    public OfferedService getOfferedService() {
+        return offeredService;
+    }
+
+    public void setOfferedService(OfferedService offeredService) {
+        this.offeredService = offeredService;
+    }
+    
+    
 }

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Appointment - Cliente</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="app-page">
+
+    <header class="app-header">
+        <div>
+            <h1>Easy Appointment</h1>
+            <p id="welcomeMessage"></p>
+        </div>
+
+        <button id="logoutButton" class="secondary-button">Cerrar sesión</button>
+    </header>
+
+    <main class="app-container">
+
+        <section class="page-title-row">
+            <h2>Reservar turno</h2>
+            
+        </section>
+
+        <section class="app-card">
+            <form id="appointmentForm" class="appointment-form">
+                <div class="form-group">
+                    <label for="appointmentService">Servicio</label>
+                    <select id="appointmentService">
+                        <option value="">Seleccione un servicio</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="appointmentProfessional">Profesional</label>
+                    <select id="appointmentProfessional">
+                        <option value="">Seleccione un profesional</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="appointmentDate">Fecha</label>
+                    <input type="date" id="appointmentDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="appointmentTime">Hora</label>
+                    <input type="time" id="appointmentTime">
+                </div>
+
+                <p id="appointmentMessage" class="form-message"></p>
+
+                <button type="submit" class="primary-button">Reservar turno</button>
+            </form>
+        </section>
+
+        <section class="page-title-row">
+            <h2>Mis turnos</h2>
+        </section>
+
+        <section class="app-card">
+            <p id="appointmentsMessage" class="form-message"></p>
+            <ul id="appointmentsList" class="appointments-list"></ul>
+        </section>
+
+    </main>
+
+    <script src="client.js"></script>
+</body>
+</html>

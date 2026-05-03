@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador - Easy Appointment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="app-page">
+
+    <header class="app-header">
+        <div>
+            <h1>Panel Administrador</h1>
+            <p id="welcomeMessage"></p>
+        </div>
+
+        <button id="logoutButton" class="secondary-button">Cerrar sesión</button>
+    </header>
+
+    <main class="app-container">
+
+        <section class="page-title-row">
+            <h2>Gestión de servicios</h2>
+        </section>
+
+        <section class="app-card">
+            <form id="serviceForm" class="admin-form">
+                <div class="form-row">
+                    <input type="text" id="serviceName" placeholder="Nombre del servicio">
+                    <input type="number" id="serviceDuration" placeholder="Duración en minutos">
+                    <input type="number" id="servicePrice" placeholder="Precio" step="0.01">
+                    <button type="submit" class="primary-small-button">Crear servicio</button>
+                </div>
+            </form>
+
+            <button id="btnLoadServices" class="secondary-button">Cargar servicios</button>
+
+            <p id="servicesMessage" class="form-message"></p>
+
+            <ul id="servicesList" class="professionals-list"></ul>
+        </section>
+
+        <section class="page-title-row">
+            <h2>Gestión de profesionales</h2>
+        </section>
+
+        <section class="app-card">
+            <form id="professionalForm" class="admin-form">
+                <div class="form-row">
+                    <input type="text" id="professionalFirstName" placeholder="Nombre">
+                    <input type="text" id="professionalLastName" placeholder="Apellido">
+                    <button type="submit" class="primary-small-button">Crear profesional</button>
+                </div>
+            </form>
+
+            <button id="btnLoadProfessionals" class="secondary-button">Cargar profesionales</button>
+
+            <p id="professionalsMessage" class="form-message"></p>
+
+            <ul id="professionalsList" class="professionals-list"></ul>
+        </section>
+
+        <section class="page-title-row">
+            <h2>Agenda general</h2>
+        </section>
+
+        <section class="app-card">
+            <button id="btnLoadAllAppointments" class="primary-small-button">Cargar turnos</button>
+
+            <p id="appointmentsMessage" class="form-message"></p>
+
+            <div class="table-wrapper">
+                <table class="appointments-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Servicio</th>
+                            <th>Profesional</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>

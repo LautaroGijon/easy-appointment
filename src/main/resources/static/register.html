@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Easy Appointment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-page">
+
+    <main class="auth-container">
+        <section class="auth-card">
+            <h1>Crear Cuenta</h1>
+            <p class="auth-subtitle">Completa el formulario para registrarte</p>
+
+            <form id="registerForm" class="auth-form">
+                <label for="registerName">Nombre completo</label>
+                <input type="text" id="registerName" placeholder="Juan Pérez" required>
+
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" placeholder="tu@ejemplo.com" required>
+
+                <label for="registerPassword">Contraseña</label>
+                <input type="password" id="registerPassword" placeholder="••••••••" required>
+
+                <label for="registerConfirmPassword">Confirmar contraseña</label>
+                <input type="password" id="registerConfirmPassword" placeholder="••••••••" required>
+
+                <p id="registerMessage" class="auth-message"></p>
+
+                <button type="submit" class="primary-button">Registrarse</button>
+            </form>
+
+            <p class="auth-link">
+                ¿Ya tienes cuenta?
+                <a href="index.html">Iniciar sesión</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="register.js"></script>
+</body>
+</html>

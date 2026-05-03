@@ -10,21 +10,32 @@ import org.springframework.web.server.ResponseStatusException;
 import pnt.project.easy.appointment.body.AppointmentCreateRequest;
 import pnt.project.easy.appointment.body.AppointmentUpdateRequest;
 import pnt.project.easy.appointment.model.Appointment;
+import pnt.project.easy.appointment.model.OfferedService;
 import pnt.project.easy.appointment.model.Professional;
+import pnt.project.easy.appointment.model.User;
 import pnt.project.easy.appointment.model.enums.AppointmentStatus;
+import pnt.project.easy.appointment.model.enums.UserRole;
 import pnt.project.easy.appointment.repository.AppointmentRepository;
+import pnt.project.easy.appointment.repository.OfferedServiceRepository;
 import pnt.project.easy.appointment.repository.ProfessionalRepository;
+import pnt.project.easy.appointment.repository.UserRepository;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final ProfessionalRepository professionalRepository;
+    private final UserRepository userRepository;
+    private final OfferedServiceRepository offeredServiceRepository;
 
     public AppointmentServiceImpl(AppointmentRepository appointmentRepository,
-                                  ProfessionalRepository professionalRepository) {
+                                  ProfessionalRepository professionalRepository,
+                                  UserRepository userRepository,
+                                  OfferedServiceRepository offeredServiceRepository) {
         this.appointmentRepository = appointmentRepository;
         this.professionalRepository = professionalRepository;
+        this.userRepository = userRepository;
+        this.offeredServiceRepository = offeredServiceRepository;
     }
 
     @Override
@@ -42,7 +53,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         validateDateIsNotPast(request.getDate());
 
+        User client = findClientById(request.getClientId());
         Professional professional = findProfessionalById(request.getProfessionalId());
+        OfferedService offeredService = findOfferedServiceById(request.getServiceId());
 
         validateProfessionalAvailability(
                 professional,
@@ -51,11 +64,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         );
 
         Appointment appointment = new Appointment();
-        appointment.setClientName(request.getClientName());
+        appointment.setClient(client);
+        appointment.setProfessional(professional);
+        appointment.setOfferedService(offeredService);
         appointment.setDate(request.getDate());
         appointment.setTime(request.getTime());
         appointment.setStatus(AppointmentStatus.ACTIVE);
-        appointment.setProfessional(professional);
 
         return appointmentRepository.save(appointment);
     }
@@ -75,6 +89,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         validateDateIsNotPast(request.getDate());
 
         Professional professional = findProfessionalById(request.getProfessionalId());
+        OfferedService offeredService = findOfferedServiceById(request.getServiceId());
 
         boolean appointmentExists = appointmentRepository.existsByProfessionalAndDateAndTimeAndStatusAndIdNot(
                 professional,
@@ -91,10 +106,10 @@ public class AppointmentServiceImpl implements AppointmentService {
             );
         }
 
-        appointment.setClientName(request.getClientName());
         appointment.setDate(request.getDate());
         appointment.setTime(request.getTime());
         appointment.setProfessional(professional);
+        appointment.setOfferedService(offeredService);
 
         return appointmentRepository.save(appointment);
     }
@@ -136,6 +151,31 @@ public class AppointmentServiceImpl implements AppointmentService {
                         HttpStatus.NOT_FOUND,
                         "Professional not found"
                 ));
+    }
+
+    private OfferedService findOfferedServiceById(Long serviceId) {
+        return offeredServiceRepository.findById(serviceId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Service not found"
+                ));
+    }
+
+    private User findClientById(Long clientId) {
+        User client = userRepository.findById(clientId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Client not found"
+                ));
+
+        if (client.getRole() != UserRole.CLIENT) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "User must have CLIENT role to create an appointment"
+            );
+        }
+
+        return client;
     }
 
     private void validateDateIsNotPast(LocalDate date) {

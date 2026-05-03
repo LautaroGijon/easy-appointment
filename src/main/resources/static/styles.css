@@ -1,0 +1,455 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #111827;
+}
+
+/* =========================
+   LOGIN / REGISTER
+========================= */
+
+.auth-page {
+    min-height: 100vh;
+    background-color: #eef4ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 540px;
+}
+
+.auth-card {
+    background-color: #ffffff;
+    border-radius: 22px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.brand-title {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 34px;
+    font-weight: 700;
+}
+
+.auth-card h1,
+.auth-card h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+.auth-card h1 {
+    font-size: 26px;
+}
+
+.auth-card h2 {
+    font-size: 24px;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: #6b7280;
+    font-size: 18px;
+    margin-bottom: 28px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.auth-form label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #374151;
+    margin-top: 6px;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 16px 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 14px;
+    font-size: 18px;
+    background-color: #fff;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.auth-form input:focus {
+    border-color: #6d4cff;
+    box-shadow: 0 0 0 3px rgba(109, 76, 255, 0.15);
+}
+
+.primary-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #4f46e5, #6d28d9);
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.primary-button:hover {
+    opacity: 0.92;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 28px;
+    color: #6b7280;
+    font-size: 18px;
+}
+
+.auth-link a {
+    color: #5b3df5;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+.auth-message {
+    display: none;
+    margin-top: 8px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.auth-message.error {
+    display: block;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+}
+
+.auth-message.success {
+    display: block;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #16a34a;
+}
+
+/* =========================
+   CLIENT HOME
+========================= */
+
+.app-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #eef4ff, #fff1fb);
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 42px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 32px;
+}
+
+.app-header p {
+    margin: 8px 0 0;
+    color: #4b5563;
+    font-size: 16px;
+}
+
+.app-container {
+    width: 92%;
+    max-width: 980px;
+    margin: 32px auto;
+}
+
+.page-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.page-title-row h2 {
+    margin: 0;
+    font-size: 26px;
+}
+
+.app-card {
+    background-color: #ffffff;
+    border-radius: 18px;
+    padding: 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.appointment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 700;
+    color: #374151;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 16px;
+    background-color: #ffffff;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
+}
+
+.primary-small-button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #7c3aed, #a21caf);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.secondary-button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    background-color: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.secondary-button:hover,
+.primary-small-button:hover {
+    opacity: 0.9;
+}
+
+.form-message {
+    margin: 0;
+    font-size: 15px;
+}
+
+.appointments-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.appointments-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+    font-size: 16px;
+}
+
+.appointments-list button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 10px;
+    background-color: #fee2e2;
+    color: #dc2626;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.appointments-list button:hover {
+    background-color: #fecaca;
+}
+
+
+/* =========================
+   ADMIN PANEL
+========================= */
+
+.admin-form {
+    margin-bottom: 18px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.form-row input {
+    flex: 1;
+    min-width: 180px;
+    padding: 13px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+}
+
+.form-row input:focus {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
+}
+
+.professionals-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
+}
+
+.professionals-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.professionals-list button {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    background-color: #fee2e2;
+    color: #dc2626;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.professionals-list button:hover {
+    background-color: #fecaca;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 18px;
+}
+
+.appointments-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.appointments-table th,
+.appointments-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.appointments-table th {
+    background-color: #f9fafb;
+    color: #374151;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.appointments-table td {
+    font-size: 15px;
+}
+
+.appointments-table tr:hover {
+    background-color: #f9fafb;
+}
+
+.appointments-table button {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    background-color: #fee2e2;
+    color: #dc2626;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.appointments-table button:hover {
+    background-color: #fecaca;
+}
+
+
+.appointment-item {
+    align-items: flex-start;
+}
+
+.appointment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.appointment-info p {
+    margin: 0;
+    color: #374151;
+}
+
+.status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.status.active {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.status.cancelled {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.status.finished {
+    background-color: #e0e7ff;
+    color: #4338ca;
+}

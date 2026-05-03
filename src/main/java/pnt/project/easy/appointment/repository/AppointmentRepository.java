@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import pnt.project.easy.appointment.model.Appointment;
 import pnt.project.easy.appointment.model.Professional;
 import pnt.project.easy.appointment.model.enums.AppointmentStatus;
+import pnt.project.easy.appointment.model.OfferedService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,5 +29,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 	        Long id
 	);
 	
+	boolean existsByProfessional(Professional professional);
 	
+	
+	boolean existsByOfferedService(OfferedService offeredService);
 }
