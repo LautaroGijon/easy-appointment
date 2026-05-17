@@ -6,86 +6,133 @@
     <title>Panel Administrador - Easy Appointment</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="app-page">
+<body class="app-page admin-page">
 
-    <header class="app-header">
-        <div>
+    <header class="app-header admin-header">
+        <div class="admin-header-content">
+            <span class="admin-eyebrow">Panel de gestión</span>
             <h1>Panel Administrador</h1>
             <p id="welcomeMessage"></p>
+            <p class="admin-header-subtitle">Gestioná servicios, profesionales y turnos desde un solo lugar.</p>
         </div>
 
         <button id="logoutButton" class="secondary-button">Cerrar sesión</button>
     </header>
 
-    <main class="app-container">
+    <main class="app-container admin-container">
 
-        <section class="page-title-row">
-            <h2>Gestión de servicios</h2>
+        <section class="dashboard-grid">
+            <article class="dashboard-card">
+                <span class="dashboard-label">Servicios</span>
+                <strong id="servicesCounter" class="dashboard-number">0</strong>
+            </article>
+
+            <article class="dashboard-card">
+                <span class="dashboard-label">Profesionales</span>
+                <strong id="professionalsCounter" class="dashboard-number">0</strong>
+            </article>
+
+            <article class="dashboard-card">
+                <span class="dashboard-label">Turnos activos</span>
+                <strong id="activeAppointmentsCounter" class="dashboard-number">0</strong>
+            </article>
+
+            <article class="dashboard-card">
+                <span class="dashboard-label">Turnos cancelados</span>
+                <strong id="cancelledAppointmentsCounter" class="dashboard-number">0</strong>
+            </article>
         </section>
 
-        <section class="app-card">
-            <form id="serviceForm" class="admin-form">
-                <div class="form-row">
-                    <input type="text" id="serviceName" placeholder="Nombre del servicio">
-                    <input type="number" id="serviceDuration" placeholder="Duración en minutos">
-                    <input type="number" id="servicePrice" placeholder="Precio" step="0.01">
-                    <button type="submit" class="primary-small-button">Crear servicio</button>
+        <section class="admin-tabs">
+            <button class="admin-section-tab active" data-target="servicesPanel" type="button">
+                Gestión de servicios
+            </button>
+
+            <button class="admin-section-tab" data-target="professionalsPanel" type="button">
+                Gestión de profesionales
+            </button>
+
+            <button class="admin-section-tab" data-target="appointmentsPanel" type="button">
+                Agenda general
+            </button>
+        </section>
+
+        <section id="servicesPanel" class="admin-section-panel active">
+            <section class="page-title-row">
+                <h2>Gestión de servicios</h2>
+            </section>
+
+            <section class="app-card">
+                <form id="serviceForm" class="admin-form">
+                    <div class="form-row">
+                        <input type="text" id="serviceName" placeholder="Nombre del servicio" required>
+                        <input type="number" id="serviceDuration" placeholder="Duración en minutos" min="1" required>
+                        <input type="number" id="servicePrice" placeholder="Precio" min="0.01" step="0.01" required>
+                        <button type="submit" class="primary-small-button">Crear servicio</button>
+                    </div>
+                </form>
+
+                <p id="servicesMessage" class="form-message"></p>
+
+                <ul id="servicesList" class="professionals-list"></ul>
+            </section>
+        </section>
+
+        <section id="professionalsPanel" class="admin-section-panel">
+            <section class="page-title-row">
+                <h2>Gestión de profesionales</h2>
+            </section>
+
+            <section class="app-card">
+                <form id="professionalForm" class="admin-form">
+                    <div class="form-row">
+                        <input type="text" id="professionalFirstName" placeholder="Nombre" required>
+                        <input type="text" id="professionalLastName" placeholder="Apellido" required>
+                        <button type="submit" class="primary-small-button">Crear profesional</button>
+                    </div>
+                </form>
+
+                <p id="professionalsMessage" class="form-message"></p>
+
+                <ul id="professionalsList" class="professionals-list"></ul>
+            </section>
+        </section>
+
+        <section id="appointmentsPanel" class="admin-section-panel">
+            <section class="page-title-row agenda-header-row">
+                <h2>Agenda general</h2>
+
+                <div class="filter-group">
+                    <label for="appointmentStatusFilter">Filtrar por estado</label>
+                    <select id="appointmentStatusFilter">
+                        <option value="ALL">Todos</option>
+                        <option value="ACTIVE">Activos</option>
+                        <option value="CANCELLED">Cancelados</option>
+                    </select>
                 </div>
-            </form>
+            </section>
 
-            <button id="btnLoadServices" class="secondary-button">Cargar servicios</button>
+            <section class="app-card agenda-card">
+                <p id="appointmentsMessage" class="form-message"></p>
 
-            <p id="servicesMessage" class="form-message"></p>
-
-            <ul id="servicesList" class="professionals-list"></ul>
-        </section>
-
-        <section class="page-title-row">
-            <h2>Gestión de profesionales</h2>
-        </section>
-
-        <section class="app-card">
-            <form id="professionalForm" class="admin-form">
-                <div class="form-row">
-                    <input type="text" id="professionalFirstName" placeholder="Nombre">
-                    <input type="text" id="professionalLastName" placeholder="Apellido">
-                    <button type="submit" class="primary-small-button">Crear profesional</button>
+                <div class="table-wrapper">
+                    <table class="appointments-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Cliente</th>
+                                <th>Servicio</th>
+                                <th>Profesional</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody">
+                        </tbody>
+                    </table>
                 </div>
-            </form>
-
-            <button id="btnLoadProfessionals" class="secondary-button">Cargar profesionales</button>
-
-            <p id="professionalsMessage" class="form-message"></p>
-
-            <ul id="professionalsList" class="professionals-list"></ul>
-        </section>
-
-        <section class="page-title-row">
-            <h2>Agenda general</h2>
-        </section>
-
-        <section class="app-card">
-            <button id="btnLoadAllAppointments" class="primary-small-button">Cargar turnos</button>
-
-            <p id="appointmentsMessage" class="form-message"></p>
-
-            <div class="table-wrapper">
-                <table class="appointments-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Cliente</th>
-                            <th>Servicio</th>
-                            <th>Profesional</th>
-                            <th>Estado</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="appointmentsTableBody">
-                    </tbody>
-                </table>
-            </div>
+            </section>
         </section>
 
     </main>

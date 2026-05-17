@@ -21,7 +21,6 @@
 
         <section class="page-title-row">
             <h2>Reservar turno</h2>
-            
         </section>
 
         <section class="app-card">
@@ -56,8 +55,17 @@
             </form>
         </section>
 
-        <section class="page-title-row">
+        <section class="page-title-row client-appointments-header">
             <h2>Mis turnos</h2>
+
+            <div class="filter-group">
+                <label for="clientAppointmentStatusFilter">Filtrar por estado</label>
+                <select id="clientAppointmentStatusFilter">
+                    <option value="ALL">Todos</option>
+                    <option value="ACTIVE">Activos</option>
+                    <option value="CANCELLED">Cancelados</option>
+                </select>
+            </div>
         </section>
 
         <section class="app-card">

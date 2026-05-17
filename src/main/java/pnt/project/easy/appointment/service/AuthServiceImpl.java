@@ -23,7 +23,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse register(RegisterRequest request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        validateFullName(request.getName());
+
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Email is already registered"
@@ -31,8 +35,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = new User();
+
         user.setName(capitalizeWords(request.getName()));
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
         user.setPassword(request.getPassword());
         user.setRole(UserRole.CLIENT);
 
@@ -49,7 +54,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
+        String email = request.getEmail().trim().toLowerCase();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED,
                         "Invalid email or password"
@@ -69,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
                 user.getRole()
         );
     }
-    
+
     private String capitalizeWords(String text) {
         if (text == null || text.isBlank()) {
             return text;
@@ -85,5 +92,14 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return result.toString().trim();
+    }
+
+    private void validateFullName(String name) {
+        if (name == null || name.trim().split("\\s+").length < 2) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Debe ingresar nombre y apellido"
+            );
+        }
     }
 }

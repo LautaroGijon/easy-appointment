@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import jakarta.persistence.*;
 import pnt.project.easy.appointment.model.enums.AppointmentStatus;
 
-@Entity
+@Entity 
 @Table(name = "appointments")
 public class Appointment {
 

@@ -2,7 +2,7 @@ package pnt.project.easy.appointment.service;
 
 import java.time.LocalDate;
 import java.util.List;
-
+import java.time.LocalTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -51,7 +51,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Appointment create(AppointmentCreateRequest request) {
 
-        validateDateIsNotPast(request.getDate());
+    	validateDateAndTimeAreNotPast(request.getDate(), request.getTime());
 
         User client = findClientById(request.getClientId());
         Professional professional = findProfessionalById(request.getProfessionalId());
@@ -86,7 +86,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             );
         }
 
-        validateDateIsNotPast(request.getDate());
+        validateDateAndTimeAreNotPast(request.getDate(), request.getTime());
 
         Professional professional = findProfessionalById(request.getProfessionalId());
         OfferedService offeredService = findOfferedServiceById(request.getServiceId());
@@ -178,11 +178,20 @@ public class AppointmentServiceImpl implements AppointmentService {
         return client;
     }
 
-    private void validateDateIsNotPast(LocalDate date) {
+    private void validateDateAndTimeAreNotPast(LocalDate date, LocalTime time) {
         if (date.isBefore(LocalDate.now())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Appointment date cannot be in the past"
+            );
+        }
+
+        LocalTime currentTime = LocalTime.now().withSecond(0).withNano(0);
+
+        if (date.isEqual(LocalDate.now()) && time.isBefore(currentTime)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Appointment time cannot be in the past"
             );
         }
     }

@@ -1,8 +1,8 @@
-spring:
+spring: 
   datasource:
     url: jdbc:mysql://localhost:3306/easy_appointment_db
     username: root
-    password: Tmsassistant2025!
+    password: Lauti1234
 
   jpa:
     hibernate:

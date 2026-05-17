@@ -7,13 +7,13 @@
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
+		<artifactId>spring-boot-starter-parent</artifactId> 
 		<version>3.5.3</version>
 		<relativePath/>
 	</parent>
 
-	<groupId>pnt.project</groupId>
-	<artifactId>easy-appointment</artifactId>
+	<groupId>pnt.project</groupId> <!-- Grupo o organizacion -->
+	<artifactId>easy-appointment</artifactId> <!-- nombre técnico del proyecto Maven -->
 	<version>0.0.1-SNAPSHOT</version>
 	<name>easy-appointment</name>
 	<description>Sistema de Gestión de Turnos - EASY APPOINTMENT</description>
@@ -22,15 +22,22 @@
 		<java.version>21</java.version>
 	</properties>
 
-	<dependencies>
+	<dependencies> 
+	<!--son librerías externas que Maven descarga para que el proyecto pueda usar ciertas funcionalidades. -->
+	
 
-		<!-- REST API (Controllers, JSON, etc.) -->
+		<!-- REST API -->
+<!-- Me deja crear una API REST, me da herrameintas como (Controllers, JSON con Jackson, servidor embebido Tomcat)-->		
+<!-- Sirve para las peticiones del front al back-->		
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<!-- JPA + Hibernate -->
+		<!-- JPA + Hibernate
+		Esta dependencia permite trabajar con base de datos usando entidades Java
+		 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -49,14 +56,10 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- Lombok -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
-		</dependency>
+
 
 		<!-- DevTools -->
+		<!-- Ante un cambio en una clase, al guardar cambios, reinicia la app automaticamente-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -73,7 +76,8 @@
 
 	</dependencies>
 
-	<build>
+	<build> 
+	<!-- Este plugin permite ejecutar y empaquetar la aplicación Spring Boot.-->
 		<plugins>
 
 			<!-- Spring Boot Plugin -->

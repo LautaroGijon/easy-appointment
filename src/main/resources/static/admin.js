@@ -1,3 +1,5 @@
+let allAppointments = [];
+
 document.addEventListener("DOMContentLoaded", function () {
     const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
 
@@ -15,13 +17,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const logoutButton = document.getElementById("logoutButton");
 
     const serviceForm = document.getElementById("serviceForm");
-    const btnLoadServices = document.getElementById("btnLoadServices");
-
-    const btnLoadProfessionals = document.getElementById("btnLoadProfessionals");
     const professionalForm = document.getElementById("professionalForm");
-
-    const btnLoadAllAppointments = document.getElementById("btnLoadAllAppointments");
-
+    const appointmentStatusFilter = document.getElementById("appointmentStatusFilter");
     welcomeMessage.textContent = `Bienvenido, ${loggedUser.name}`;
 
     logoutButton.addEventListener("click", function () {
@@ -30,23 +27,23 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     serviceForm.addEventListener("submit", createService);
-    btnLoadServices.addEventListener("click", loadServices);
-
-    btnLoadProfessionals.addEventListener("click", loadProfessionals);
     professionalForm.addEventListener("submit", createProfessional);
-
-    btnLoadAllAppointments.addEventListener("click", loadAllAppointments);
+    appointmentStatusFilter.addEventListener("change", renderFilteredAppointments);
 
     loadServices();
     loadProfessionals();
     loadAllAppointments();
+    setupAdminSections();
 });
 
-async function loadServices() {
+async function loadServices(showLoading = true) {
     const servicesList = document.getElementById("servicesList");
     const servicesMessage = document.getElementById("servicesMessage");
 
-    servicesMessage.textContent = "Cargando servicios...";
+    if (showLoading) {
+        showMessage(servicesMessage, "Cargando servicios...", "info");
+    }
+
     servicesList.innerHTML = "";
 
     try {
@@ -57,13 +54,16 @@ async function loadServices() {
         }
 
         const services = await response.json();
+        updateCounter("servicesCounter", services.length);
 
         renderServices(services);
 
-        servicesMessage.textContent = "";
+        if (showLoading) {
+            clearMessage(servicesMessage);
+        }
 
     } catch (error) {
-        servicesMessage.textContent = error.message;
+        showMessage(servicesMessage, error.message, "error");
     }
 }
 
@@ -84,7 +84,11 @@ function renderServices(services) {
         serviceText.textContent = `${service.name} - ${service.durationMinutes} min - $${service.price}`;
 
         const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Eliminar";
+        deleteButton.textContent = "🗑️";
+        deleteButton.classList.add("icon-action-button", "danger-icon-button");
+        deleteButton.setAttribute("data-tooltip", "Eliminar");
+        deleteButton.setAttribute("aria-label", "Eliminar");
+        deleteButton.title = "Eliminar";
 
         deleteButton.addEventListener("click", function () {
             deleteService(service.id);
@@ -105,10 +109,40 @@ async function createService(event) {
     const priceInput = document.getElementById("servicePrice");
     const servicesMessage = document.getElementById("servicesMessage");
 
-    servicesMessage.textContent = "";
+    clearMessage(servicesMessage);
+
+    if (nameInput.value.trim() === "") {
+        showMessage(servicesMessage, "Debe ingresar el nombre del servicio", "error");
+        nameInput.focus();
+        return;
+    }
+
+    if (durationInput.value === "") {
+        showMessage(servicesMessage, "Debe ingresar la duración del servicio", "error");
+        durationInput.focus();
+        return;
+    }
+
+    if (Number(durationInput.value) <= 0) {
+        showMessage(servicesMessage, "La duración debe ser mayor a cero", "error");
+        durationInput.focus();
+        return;
+    }
+
+    if (priceInput.value === "") {
+        showMessage(servicesMessage, "Debe ingresar el precio del servicio", "error");
+        priceInput.focus();
+        return;
+    }
+
+    if (Number(priceInput.value) <= 0) {
+        showMessage(servicesMessage, "El precio debe ser mayor a cero", "error");
+        priceInput.focus();
+        return;
+    }
 
     const offeredService = {
-        name: nameInput.value,
+        name: nameInput.value.trim(),
         durationMinutes: Number(durationInput.value),
         price: Number(priceInput.value)
     };
@@ -128,16 +162,16 @@ async function createService(event) {
             throw new Error(data.message || "No se pudo crear el servicio");
         }
 
-        servicesMessage.textContent = "Servicio creado correctamente";
-
         nameInput.value = "";
         durationInput.value = "";
         priceInput.value = "";
 
-        loadServices();
+        await loadServices(false);
+
+        showMessage(servicesMessage, "Servicio creado correctamente", "success");
 
     } catch (error) {
-        servicesMessage.textContent = error.message;
+        showMessage(servicesMessage, error.message, "error");
     }
 }
 
@@ -162,25 +196,29 @@ async function deleteService(id) {
                 const data = await response.json();
                 errorMessage = data.message || errorMessage;
             } catch (error) {
+                // Si el backend no devuelve JSON, dejamos el mensaje genérico.
             }
 
             throw new Error(errorMessage);
         }
 
-        servicesMessage.textContent = "Servicio eliminado correctamente";
+        await loadServices(false);
 
-        loadServices();
+        showMessage(servicesMessage, "Servicio eliminado correctamente", "success");
 
     } catch (error) {
-        servicesMessage.textContent = error.message;
+        showMessage(servicesMessage, error.message, "error");
     }
 }
 
-async function loadProfessionals() {
+async function loadProfessionals(showLoading = true) {
     const professionalsList = document.getElementById("professionalsList");
     const professionalsMessage = document.getElementById("professionalsMessage");
 
-    professionalsMessage.textContent = "Cargando profesionales...";
+    if (showLoading) {
+        showMessage(professionalsMessage, "Cargando profesionales...", "info");
+    }
+
     professionalsList.innerHTML = "";
 
     try {
@@ -191,13 +229,16 @@ async function loadProfessionals() {
         }
 
         const professionals = await response.json();
+        updateCounter("professionalsCounter", professionals.length);
 
         renderProfessionals(professionals);
 
-        professionalsMessage.textContent = "";
+        if (showLoading) {
+            clearMessage(professionalsMessage);
+        }
 
     } catch (error) {
-        professionalsMessage.textContent = error.message;
+        showMessage(professionalsMessage, error.message, "error");
     }
 }
 
@@ -218,7 +259,11 @@ function renderProfessionals(professionals) {
         professionalText.textContent = `${professional.firstName} ${professional.lastName}`;
 
         const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Eliminar";
+        deleteButton.textContent = "🗑️";
+        deleteButton.classList.add("icon-action-button", "danger-icon-button");
+        deleteButton.setAttribute("data-tooltip", "Eliminar");
+        deleteButton.setAttribute("aria-label", "Eliminar");
+        deleteButton.title = "Eliminar";
 
         deleteButton.addEventListener("click", function () {
             deleteProfessional(professional.id);
@@ -238,11 +283,23 @@ async function createProfessional(event) {
     const lastNameInput = document.getElementById("professionalLastName");
     const professionalsMessage = document.getElementById("professionalsMessage");
 
-    professionalsMessage.textContent = "";
+    clearMessage(professionalsMessage);
+
+    if (firstNameInput.value.trim() === "") {
+        showMessage(professionalsMessage, "Debe ingresar el nombre del profesional", "error");
+        firstNameInput.focus();
+        return;
+    }
+
+    if (lastNameInput.value.trim() === "") {
+        showMessage(professionalsMessage, "Debe ingresar el apellido del profesional", "error");
+        lastNameInput.focus();
+        return;
+    }
 
     const professional = {
-        firstName: firstNameInput.value,
-        lastName: lastNameInput.value
+        firstName: firstNameInput.value.trim(),
+        lastName: lastNameInput.value.trim()
     };
 
     try {
@@ -260,15 +317,15 @@ async function createProfessional(event) {
             throw new Error(data.message || "No se pudo crear el profesional");
         }
 
-        professionalsMessage.textContent = "Profesional creado correctamente";
-
         firstNameInput.value = "";
         lastNameInput.value = "";
 
-        loadProfessionals();
+        await loadProfessionals(false);
+
+        showMessage(professionalsMessage, "Profesional creado correctamente", "success");
 
     } catch (error) {
-        professionalsMessage.textContent = error.message;
+        showMessage(professionalsMessage, error.message, "error");
     }
 }
 
@@ -293,25 +350,29 @@ async function deleteProfessional(id) {
                 const data = await response.json();
                 errorMessage = data.message || errorMessage;
             } catch (error) {
+                // Si el backend no devuelve JSON, dejamos el mensaje genérico.
             }
 
             throw new Error(errorMessage);
         }
 
-        professionalsMessage.textContent = "Profesional eliminado correctamente";
+        await loadProfessionals(false);
 
-        loadProfessionals();
+        showMessage(professionalsMessage, "Profesional eliminado correctamente", "success");
 
     } catch (error) {
-        professionalsMessage.textContent = error.message;
+        showMessage(professionalsMessage, error.message, "error");
     }
 }
 
-async function loadAllAppointments() {
+async function loadAllAppointments(showLoading = true) {
     const appointmentsMessage = document.getElementById("appointmentsMessage");
     const appointmentsTableBody = document.getElementById("appointmentsTableBody");
 
-    appointmentsMessage.textContent = "Cargando turnos...";
+    if (showLoading) {
+        showMessage(appointmentsMessage, "Cargando turnos...", "info");
+    }
+
     appointmentsTableBody.innerHTML = "";
 
     try {
@@ -323,12 +384,17 @@ async function loadAllAppointments() {
 
         const appointments = await response.json();
 
-        renderAllAppointments(appointments);
+        allAppointments = appointments;
 
-        appointmentsMessage.textContent = "";
+        updateAppointmentCounters(allAppointments);
+        renderFilteredAppointments();
+
+        if (showLoading) {
+            clearMessage(appointmentsMessage);
+        }
 
     } catch (error) {
-        appointmentsMessage.textContent = error.message;
+        showMessage(appointmentsMessage, error.message, "error");
     }
 }
 
@@ -362,12 +428,12 @@ function renderAllAppointments(appointments) {
             : "Sin profesional";
 
         row.innerHTML = `
-            <td>${appointment.date}</td>
-            <td>${appointment.time}</td>
+            <td>${formatDate(appointment.date)}</td>
+            <td>${formatTime(appointment.time)}</td>
             <td>${clientName}</td>
             <td>${serviceName}</td>
             <td>${professionalName}</td>
-            <td><span class="status ${appointment.status.toLowerCase()}">${appointment.status}</span></td>
+            <td><span class="status ${appointment.status.toLowerCase()}">${getStatusLabel(appointment.status)}</span></td>
             <td></td>
         `;
 
@@ -410,11 +476,112 @@ async function cancelAppointmentAsAdmin(id) {
             throw new Error(data.message || "No se pudo cancelar el turno");
         }
 
-        appointmentsMessage.textContent = "Turno cancelado correctamente";
+        await loadAllAppointments(false);
 
-        loadAllAppointments();
+        showMessage(appointmentsMessage, "Turno cancelado correctamente", "success");
 
     } catch (error) {
-        appointmentsMessage.textContent = error.message;
+        showMessage(appointmentsMessage, error.message, "error");
     }
 }
+
+function showMessage(element, message, type) {
+    element.textContent = message;
+    element.className = `form-message ${type}`;
+}
+
+function clearMessage(element) {
+    element.textContent = "";
+    element.className = "form-message";
+}
+
+function formatDate(date) {
+    if (!date) {
+        return "";
+    }
+
+    const parts = date.split("-");
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+function formatTime(time) {
+    if (!time) {
+        return "";
+    }
+
+    return time.substring(0, 5);
+}
+
+function renderFilteredAppointments() {
+    const appointmentStatusFilter = document.getElementById("appointmentStatusFilter");
+
+    let filteredAppointments = allAppointments;
+
+    if (appointmentStatusFilter.value !== "ALL") {
+        filteredAppointments = allAppointments.filter(function (appointment) {
+            return appointment.status === appointmentStatusFilter.value;
+        });
+    }
+
+    renderAllAppointments(filteredAppointments);
+}
+
+function updateAppointmentCounters(appointments) {
+    const activeAppointments = appointments.filter(function (appointment) {
+        return appointment.status === "ACTIVE";
+    });
+
+    const cancelledAppointments = appointments.filter(function (appointment) {
+        return appointment.status === "CANCELLED";
+    });
+
+    updateCounter("activeAppointmentsCounter", activeAppointments.length);
+    updateCounter("cancelledAppointmentsCounter", cancelledAppointments.length);
+}
+
+function updateCounter(elementId, value) {
+    const element = document.getElementById(elementId);
+
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+function setupAdminSections() {
+    const sectionTabs = document.querySelectorAll(".admin-section-tab");
+    const sectionPanels = document.querySelectorAll(".admin-section-panel");
+
+    sectionTabs.forEach(function (tab) {
+        tab.addEventListener("click", function () {
+            const targetId = tab.getAttribute("data-target");
+
+            sectionTabs.forEach(function (currentTab) {
+                currentTab.classList.remove("active");
+            });
+
+            sectionPanels.forEach(function (panel) {
+                panel.classList.remove("active");
+            });
+
+            tab.classList.add("active");
+
+            const targetPanel = document.getElementById(targetId);
+
+            if (targetPanel) {
+                targetPanel.classList.add("active");
+            }
+        });
+    });
+}
+function getStatusLabel(status) {
+    if (status === "ACTIVE") {
+        return "Activo";
+    }
+
+    if (status === "CANCELLED") {
+        return "Cancelado";
+    }
+
+    return status;
+}
+
