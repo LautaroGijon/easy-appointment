@@ -33,4 +33,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 	
 	
 	boolean existsByOfferedService(OfferedService offeredService);
+	
+	boolean existsByProfessionalAndStatus(Professional professional, AppointmentStatus status);
 }

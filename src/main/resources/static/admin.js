@@ -261,9 +261,9 @@ function renderProfessionals(professionals) {
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "🗑️";
         deleteButton.classList.add("icon-action-button", "danger-icon-button");
-        deleteButton.setAttribute("data-tooltip", "Eliminar");
-        deleteButton.setAttribute("aria-label", "Eliminar");
-        deleteButton.title = "Eliminar";
+        deleteButton.setAttribute("data-tooltip", "Dar de baja");
+        deleteButton.setAttribute("aria-label", "Dar de baja");
+        deleteButton.title = "Dar de baja";
 
         deleteButton.addEventListener("click", function () {
             deleteProfessional(professional.id);
@@ -332,7 +332,7 @@ async function createProfessional(event) {
 async function deleteProfessional(id) {
     const professionalsMessage = document.getElementById("professionalsMessage");
 
-    const confirmed = confirm("¿Seguro que querés eliminar este profesional?");
+    const confirmed = confirm("¿Seguro que querés dar de baja este profesional?");
 
     if (!confirmed) {
         return;
@@ -358,7 +358,7 @@ async function deleteProfessional(id) {
 
         await loadProfessionals(false);
 
-        showMessage(professionalsMessage, "Profesional eliminado correctamente", "success");
+        showMessage(professionalsMessage, "Profesional dado de baja correctamente", "success");
 
     } catch (error) {
         showMessage(professionalsMessage, error.message, "error");

@@ -18,6 +18,10 @@ public class Professional {
     @NotBlank(message = "Last name is required")
     @Column(nullable = false)
     private String lastName;
+    
+    
+    @Column(nullable = false)
+    private Boolean active = true;
 
     public Professional() {
     }
@@ -40,5 +44,13 @@ public class Professional {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+    
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }
