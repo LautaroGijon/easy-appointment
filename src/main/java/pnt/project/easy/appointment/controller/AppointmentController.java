@@ -1,6 +1,8 @@
 package pnt.project.easy.appointment.controller;
 
-import java.util.List;import pnt.project.easy.appointment.body.AppointmentUpdateRequest;
+import java.util.List;
+import pnt.project.easy.appointment.body.AppointmentUpdateRequest;
+
 
 import pnt.project.easy.appointment.body.AppointmentCreateRequest;
 import pnt.project.easy.appointment.model.Appointment;

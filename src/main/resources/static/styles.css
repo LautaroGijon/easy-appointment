@@ -1215,3 +1215,53 @@ button {
     width: 100%;
     max-width: none;
 }
+
+.hidden {
+    display: none !important;
+}
+
+#cancelEditButton {
+    width: 100%;
+    margin-top: 14px;
+}
+
+/* =========================
+   EDIT / RESCHEDULE BUTTON
+========================= */
+
+.edit-appointment-button {
+    width: 100%;
+    max-width: 210px;
+    border: none;
+    border-radius: 13px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #5b4df0, #c026d3);
+    color: #ffffff;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(124, 58, 237, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.edit-appointment-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(124, 58, 237, 0.28);
+    opacity: 0.96;
+}
+
+.appointment-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+@media (max-width: 700px) {
+    .edit-appointment-button,
+    .cancel-appointment-button {
+        width: 100%;
+        max-width: none;
+    }
+}

@@ -14,8 +14,12 @@ import pnt.project.easy.appointment.repository.UserRepository;
 @Service
 public class AuthServiceImpl implements AuthService {
 
+	//permite que el service acceda a la base de datos de usuarios
+	//Es private porque solo lo usa esta clase.
+	//Es final porque una vez asignado en el constructor, no debería cambiar.
     private final UserRepository userRepository;
 
+    //inyecta el UserRepository en el service, evitando que la clase cree sus propias dependencias manualmente
     public AuthServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -24,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest request) {
 
         validateFullName(request.getName());
-
+        //normalizar email
         String email = request.getEmail().trim().toLowerCase();
 
         if (userRepository.existsByEmail(email)) {
@@ -34,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
             );
         }
 
+        
         User user = new User();
 
         user.setName(capitalizeWords(request.getName()));

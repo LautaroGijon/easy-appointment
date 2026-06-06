@@ -11,7 +11,6 @@ async function login(event) {
     const passwordInput = document.getElementById("loginPassword");
     const loginMessage = document.getElementById("loginMessage");
 
-  
     loginMessage.textContent = "";
     loginMessage.className = "auth-message";
 

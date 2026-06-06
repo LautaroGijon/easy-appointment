@@ -8,12 +8,12 @@
 </head>
 <body class="app-page">
 
-    <header class="app-header client-header">
-        <div class="client-header-content">
-            <span class="client-eyebrow">Panel del cliente</span>
+    <header class="app-header">
+        <div>
+            <span class="header-badge">Panel del cliente</span>
             <h1>Easy Appointment</h1>
             <p id="welcomeMessage"></p>
-            <p class="client-header-subtitle">Reservá, consultá y gestioná tus turnos de manera simple.</p>
+            <p class="header-description">Reservá, consultá y gestioná tus turnos de manera simple.</p>
         </div>
 
         <button id="logoutButton" class="secondary-button">Cerrar sesión</button>
@@ -25,9 +25,8 @@
             <h2>Reservar turno</h2>
         </section>
 
-        <section class="app-card reservation-card">
+        <section class="app-card">
             <form id="appointmentForm" class="appointment-form">
-
                 <div class="form-group">
                     <label for="appointmentService">Servicio</label>
                     <select id="appointmentService">
@@ -54,7 +53,13 @@
 
                 <p id="appointmentMessage" class="form-message"></p>
 
-                <button type="submit" class="primary-button">Reservar turno</button>
+                <button type="submit" id="appointmentSubmitButton" class="primary-button">
+                    Reservar turno
+                </button>
+
+                <button type="button" id="cancelEditButton" class="secondary-button hidden">
+                    Cancelar edición
+                </button>
             </form>
         </section>
 

@@ -1,76 +1,72 @@
-let allClientAppointments = [];
+const API_APPOINTMENTS = "/api/appointments";
+const API_SERVICES = "/api/offered-services";
+const API_PROFESSIONALS = "/api/professionals";
 
-document.addEventListener("DOMContentLoaded", function () {
-    const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+const user = JSON.parse(localStorage.getItem("loggedUser"));
 
-    if (!loggedUser) {
-        window.location.href = "index.html";
+const welcomeMessage = document.getElementById("welcomeMessage");
+const logoutButton = document.getElementById("logoutButton");
+
+const appointmentForm = document.getElementById("appointmentForm");
+const appointmentService = document.getElementById("appointmentService");
+const appointmentProfessional = document.getElementById("appointmentProfessional");
+const appointmentDate = document.getElementById("appointmentDate");
+const appointmentTime = document.getElementById("appointmentTime");
+const appointmentMessage = document.getElementById("appointmentMessage");
+const appointmentSubmitButton = document.getElementById("appointmentSubmitButton");
+const cancelEditButton = document.getElementById("cancelEditButton");
+
+const appointmentsList = document.getElementById("appointmentsList");
+const appointmentsMessage = document.getElementById("appointmentsMessage");
+const clientAppointmentStatusFilter = document.getElementById("clientAppointmentStatusFilter");
+
+let allAppointments = [];
+let editingAppointmentId = null;
+
+document.addEventListener("DOMContentLoaded", async function () {
+    if (!validateSession()) {
         return;
     }
 
-    if (loggedUser.role === "ADMIN") {
-        window.location.href = "admin.html";
-        return;
-    }
+    setWelcomeMessage();
+    setMinimumDate();
 
-    const welcomeMessage = document.getElementById("welcomeMessage");
-    const logoutButton = document.getElementById("logoutButton");
-    const appointmentForm = document.getElementById("appointmentForm");
-    const dateInput = document.getElementById("appointmentDate");
-    const clientAppointmentStatusFilter = document.getElementById("clientAppointmentStatusFilter");
-
-    dateInput.min = getTodayLocalDate();
-
-    welcomeMessage.textContent = `Bienvenido, ${loggedUser.name}`;
-
-    logoutButton.addEventListener("click", function () {
-        localStorage.removeItem("loggedUser");
-        window.location.href = "index.html";
-    });
-
-    appointmentForm.addEventListener("submit", createAppointment);
-    clientAppointmentStatusFilter.addEventListener("change", renderFilteredClientAppointments);
-
-    loadServicesOptions();
-    loadProfessionalsOptions();
-    loadAppointments();
+    await loadServices();
+    await loadProfessionals();
+    await loadAppointments();
 });
 
-async function loadProfessionalsOptions() {
-    const professionalSelect = document.getElementById("appointmentProfessional");
-    const appointmentMessage = document.getElementById("appointmentMessage");
-
-    try {
-        const response = await fetch("/api/professionals");
-
-        if (!response.ok) {
-            throw new Error("No se pudieron cargar los profesionales");
-        }
-
-        const professionals = await response.json();
-
-        professionalSelect.innerHTML = '<option value="">Seleccione un profesional</option>';
-
-        professionals.forEach(function (professional) {
-            const option = document.createElement("option");
-
-            option.value = professional.id;
-            option.textContent = `${professional.firstName} ${professional.lastName}`;
-
-            professionalSelect.appendChild(option);
-        });
-
-    } catch (error) {
-        showMessage(appointmentMessage, error.message, "error");
+function validateSession() {
+    if (!user) {
+        window.location.href = "index.html";
+        return false;
     }
+
+    if (user.role !== "CLIENT") {
+        window.location.href = "admin.html";
+        return false;
+    }
+
+    return true;
 }
 
-async function loadServicesOptions() {
-    const serviceSelect = document.getElementById("appointmentService");
-    const appointmentMessage = document.getElementById("appointmentMessage");
+function setWelcomeMessage() {
+    welcomeMessage.textContent = `Bienvenido, ${user.name || user.fullName || "Cliente"}`;
+}
 
+function setMinimumDate() {
+    const today = new Date().toISOString().split("T")[0];
+    appointmentDate.setAttribute("min", today);
+}
+
+logoutButton.addEventListener("click", function () {
+    localStorage.removeItem("loggedUser");
+    window.location.href = "index.html";
+});
+
+async function loadServices() {
     try {
-        const response = await fetch("/api/offered-services");
+        const response = await fetch(API_SERVICES);
 
         if (!response.ok) {
             throw new Error("No se pudieron cargar los servicios");
@@ -78,15 +74,13 @@ async function loadServicesOptions() {
 
         const services = await response.json();
 
-        serviceSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
+        appointmentService.innerHTML = `<option value="">Seleccione un servicio</option>`;
 
         services.forEach(function (service) {
             const option = document.createElement("option");
-
             option.value = service.id;
-            option.textContent = `${service.name} - $${service.price}`;
-
-            serviceSelect.appendChild(option);
+            option.textContent = `${service.name} - ${service.durationMinutes} min - $${service.price}`;
+            appointmentService.appendChild(option);
         });
 
     } catch (error) {
@@ -94,109 +88,106 @@ async function loadServicesOptions() {
     }
 }
 
-async function createAppointment(event) {
+async function loadProfessionals() {
+    try {
+        const response = await fetch(API_PROFESSIONALS);
+
+        if (!response.ok) {
+            throw new Error("No se pudieron cargar los profesionales");
+        }
+
+        const professionals = await response.json();
+
+        appointmentProfessional.innerHTML = `<option value="">Seleccione un profesional</option>`;
+
+        professionals.forEach(function (professional) {
+            const option = document.createElement("option");
+            option.value = professional.id;
+            option.textContent = `${professional.firstName} ${professional.lastName}`;
+            appointmentProfessional.appendChild(option);
+        });
+
+    } catch (error) {
+        showMessage(appointmentMessage, error.message, "error");
+    }
+}
+
+appointmentForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+    const selectedServiceId = appointmentService.value;
+    const selectedProfessionalId = appointmentProfessional.value;
+    const selectedDate = appointmentDate.value;
+    const selectedTime = appointmentTime.value;
 
-    const serviceSelect = document.getElementById("appointmentService");
-    const professionalSelect = document.getElementById("appointmentProfessional");
-    const dateInput = document.getElementById("appointmentDate");
-    const timeInput = document.getElementById("appointmentTime");
-    const appointmentMessage = document.getElementById("appointmentMessage");
-
-    clearMessage(appointmentMessage);
-
-    if (serviceSelect.value === "") {
-        showMessage(appointmentMessage, "Debe seleccionar un servicio", "error");
-        serviceSelect.focus();
+    if (!selectedServiceId || !selectedProfessionalId || !selectedDate || !selectedTime) {
+        showMessage(appointmentMessage, "Completá todos los campos para continuar", "error");
         return;
     }
 
-    if (professionalSelect.value === "") {
-        showMessage(appointmentMessage, "Debe seleccionar un profesional", "error");
-        professionalSelect.focus();
-        return;
-    }
+    const requestBody = buildAppointmentRequest(
+        selectedServiceId,
+        selectedProfessionalId,
+        selectedDate,
+        selectedTime
+    );
 
-    if (dateInput.value === "") {
-        showMessage(appointmentMessage, "Debe seleccionar una fecha", "error");
-        dateInput.focus();
-        return;
-    }
+    const url = editingAppointmentId
+        ? `${API_APPOINTMENTS}/${editingAppointmentId}`
+        : API_APPOINTMENTS;
 
-    if (timeInput.value === "") {
-        showMessage(appointmentMessage, "Debe seleccionar una hora", "error");
-        timeInput.focus();
-        return;
-    }
-
-    const today = getTodayLocalDate();
-
-    if (dateInput.value < today) {
-        showMessage(appointmentMessage, "No se puede reservar un turno en una fecha pasada", "error");
-        dateInput.focus();
-        return;
-    }
-
-    const currentTime = getCurrentLocalTime();
-
-    if (dateInput.value === today && timeInput.value < currentTime) {
-        showMessage(appointmentMessage, "No se puede reservar un turno en una hora pasada", "error");
-        timeInput.focus();
-        return;
-    }
-
-    const appointment = {
-        clientId: loggedUser.id,
-        serviceId: Number(serviceSelect.value),
-        professionalId: Number(professionalSelect.value),
-        date: dateInput.value,
-        time: timeInput.value
-    };
+    const method = editingAppointmentId ? "PUT" : "POST";
 
     try {
-        const response = await fetch("/api/appointments", {
-            method: "POST",
+        const response = await fetch(url, {
+            method: method,
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(appointment)
+            body: JSON.stringify(requestBody)
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.message || "No se pudo reservar el turno");
+            const errorMessage = await getErrorMessage(response);
+            throw new Error(errorMessage);
         }
 
-        showMessage(appointmentMessage, "Turno reservado correctamente", "success");
+        if (editingAppointmentId) {
+            showMessage(appointmentMessage, "Turno reprogramado correctamente", "success");
+        } else {
+            showMessage(appointmentMessage, "Turno reservado correctamente", "success");
+        }
 
-        serviceSelect.value = "";
-        professionalSelect.value = "";
-        dateInput.value = "";
-        timeInput.value = "";
-
-        await loadAppointments(false);
+        resetAppointmentFormMode();
+        await loadAppointments();
 
     } catch (error) {
         showMessage(appointmentMessage, error.message, "error");
     }
-}
+});
 
-async function loadAppointments(showLoading = true) {
-    const appointmentsList = document.getElementById("appointmentsList");
-    const appointmentsMessage = document.getElementById("appointmentsMessage");
-    const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
-
-    if (showLoading) {
-        showMessage(appointmentsMessage, "Cargando turnos...", "info");
+function buildAppointmentRequest(serviceId, professionalId, date, time) {
+    if (editingAppointmentId) {
+        return {
+            serviceId: Number(serviceId),
+            professionalId: Number(professionalId),
+            date: date,
+            time: time
+        };
     }
 
-    appointmentsList.innerHTML = "";
+    return {
+        clientId: user.id,
+        serviceId: Number(serviceId),
+        professionalId: Number(professionalId),
+        date: date,
+        time: time
+    };
+}
 
+async function loadAppointments() {
     try {
-        const response = await fetch("/api/appointments");
+        const response = await fetch(API_APPOINTMENTS);
 
         if (!response.ok) {
             throw new Error("No se pudieron cargar los turnos");
@@ -204,108 +195,79 @@ async function loadAppointments(showLoading = true) {
 
         const appointments = await response.json();
 
-        allClientAppointments = appointments.filter(function (appointment) {
-            return appointment.client && appointment.client.id === loggedUser.id;
+        allAppointments = appointments.filter(function (appointment) {
+            return appointment.client && appointment.client.id === user.id;
         });
 
-        sortClientAppointments();
-        renderFilteredClientAppointments();
-
-        if (showLoading) {
-            clearMessage(appointmentsMessage);
-        }
+        renderAppointments();
 
     } catch (error) {
         showMessage(appointmentsMessage, error.message, "error");
     }
 }
 
-function renderFilteredClientAppointments() {
-    const clientAppointmentStatusFilter = document.getElementById("clientAppointmentStatusFilter");
+clientAppointmentStatusFilter.addEventListener("change", renderAppointments);
 
-    let filteredAppointments = allClientAppointments;
+function renderAppointments() {
+    appointmentsList.innerHTML = "";
+    appointmentsMessage.textContent = "";
+    appointmentsMessage.className = "form-message";
 
-    if (clientAppointmentStatusFilter.value !== "ALL") {
-        filteredAppointments = allClientAppointments.filter(function (appointment) {
-            return appointment.status === clientAppointmentStatusFilter.value;
-        });
-    }
+    const selectedStatus = clientAppointmentStatusFilter.value;
 
-    renderAppointments(filteredAppointments);
-}
-
-function sortClientAppointments() {
-    allClientAppointments.sort(function (a, b) {
-        if (a.status === "ACTIVE" && b.status !== "ACTIVE") {
-            return -1;
+    const filteredAppointments = allAppointments.filter(function (appointment) {
+        if (selectedStatus === "ALL") {
+            return true;
         }
 
-        if (a.status !== "ACTIVE" && b.status === "ACTIVE") {
-            return 1;
-        }
+        return appointment.status === selectedStatus;
+    });
 
-        const dateTimeA = `${a.date} ${a.time}`;
-        const dateTimeB = `${b.date} ${b.time}`;
-
+    filteredAppointments.sort(function (a, b) {
+        const dateTimeA = `${a.date} ${formatTime(a.time)}`;
+        const dateTimeB = `${b.date} ${formatTime(b.time)}`;
         return dateTimeA.localeCompare(dateTimeB);
     });
-}
 
-function renderAppointments(appointments) {
-    const appointmentsList = document.getElementById("appointmentsList");
-
-    appointmentsList.innerHTML = "";
-
-    if (appointments.length === 0) {
-        const filter = document.getElementById("clientAppointmentStatusFilter").value;
-
-        let emptyTitle = "No hay turnos para mostrar";
-        let emptyText = "Cuando reserves un turno, aparecerá en esta sección.";
-
-        if (filter === "ACTIVE") {
-            emptyTitle = "No tenés turnos activos";
-            emptyText = "Los turnos pendientes de atención aparecerán acá.";
-        }
-
-        if (filter === "CANCELLED") {
-            emptyTitle = "No tenés turnos cancelados";
-            emptyText = "Los turnos que canceles aparecerán acá.";
-        }
-
-        appointmentsList.innerHTML = `
-            <li class="empty-appointments">
-                <div class="empty-icon">📅</div>
-                <strong>${emptyTitle}</strong>
-                <span>${emptyText}</span>
-            </li>
-        `;
+    if (filteredAppointments.length === 0) {
+        renderEmptyAppointments();
         return;
     }
 
-    appointments.forEach(function (appointment) {
-        const li = document.createElement("li");
-        li.classList.add("appointment-item");
-        li.classList.add(`appointment-${appointment.status.toLowerCase()}`);
+    filteredAppointments.forEach(function (appointment) {
+        const appointmentItem = createAppointmentItem(appointment);
+        appointmentsList.appendChild(appointmentItem);
+    });
+}
 
-        const professionalName = `${appointment.professional.firstName} ${appointment.professional.lastName}`;
+function createAppointmentItem(appointment) {
+    const item = document.createElement("li");
+    item.classList.add("appointment-item");
 
-        const serviceName = appointment.offeredService
-            ? appointment.offeredService.name
-            : "Sin servicio";
+    if (appointment.status === "CANCELLED") {
+        item.classList.add("appointment-cancelled");
+    }
 
-        const appointmentInfo = document.createElement("div");
-        appointmentInfo.classList.add("appointment-info");
+    const serviceName = appointment.offeredService
+        ? appointment.offeredService.name
+        : "Servicio no disponible";
 
-        appointmentInfo.innerHTML = `
+    const professionalName = appointment.professional
+        ? `${appointment.professional.firstName} ${appointment.professional.lastName}`
+        : "Profesional no disponible";
+
+    const statusClass = getStatusClass(appointment.status);
+    const statusLabel = getStatusLabel(appointment.status);
+
+    item.innerHTML = `
+        <div class="appointment-info">
             <div class="appointment-card-header">
                 <div>
                     <span class="appointment-service-name">${serviceName}</span>
                     <p class="appointment-professional-name">${professionalName}</p>
                 </div>
 
-                <span class="status ${appointment.status.toLowerCase()}">
-                    ${getStatusLabel(appointment.status)}
-                </span>
+                <span class="status ${statusClass}">${statusLabel}</span>
             </div>
 
             <div class="appointment-details-grid">
@@ -319,97 +281,141 @@ function renderAppointments(appointments) {
                     <strong>${formatTime(appointment.time)}</strong>
                 </div>
             </div>
-        `;
+        </div>
+    `;
 
-        li.appendChild(appointmentInfo);
+    if (appointment.status === "ACTIVE") {
+        const actionsContainer = document.createElement("div");
+        actionsContainer.classList.add("appointment-actions");
 
-        if (appointment.status === "ACTIVE") {
-            const actions = document.createElement("div");
-            actions.classList.add("appointment-actions");
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.textContent = "Reprogramar";
+        editButton.classList.add("edit-appointment-button");
 
-            const cancelButton = document.createElement("button");
-            cancelButton.textContent = "Cancelar turno";
-            cancelButton.classList.add("cancel-appointment-button");
+        editButton.addEventListener("click", function () {
+            startEditAppointment(appointment);
+        });
 
-            cancelButton.addEventListener("click", function () {
-                cancelAppointment(appointment.id);
-            });
+        const cancelButton = document.createElement("button");
+        cancelButton.type = "button";
+        cancelButton.textContent = "Cancelar turno";
+        cancelButton.classList.add("cancel-appointment-button");
 
-            actions.appendChild(cancelButton);
-            li.appendChild(actions);
-        }
+        cancelButton.addEventListener("click", function () {
+            cancelAppointment(appointment.id);
+        });
 
-        appointmentsList.appendChild(li);
+        actionsContainer.appendChild(editButton);
+        actionsContainer.appendChild(cancelButton);
+        item.appendChild(actionsContainer);
+    }
+
+    return item;
+}
+
+function startEditAppointment(appointment) {
+    editingAppointmentId = appointment.id;
+
+    appointmentService.value = appointment.offeredService.id;
+    appointmentProfessional.value = appointment.professional.id;
+    appointmentDate.value = appointment.date;
+    appointmentTime.value = formatTime(appointment.time);
+
+    appointmentSubmitButton.textContent = "Guardar cambios";
+    cancelEditButton.classList.remove("hidden");
+
+    showMessage(appointmentMessage, "Estás reprogramando un turno", "success");
+
+    window.scrollTo({
+        top: appointmentForm.offsetTop - 160,
+        behavior: "smooth"
     });
 }
 
+cancelEditButton.addEventListener("click", function () {
+    resetAppointmentFormMode();
+});
+
+function resetAppointmentFormMode() {
+    editingAppointmentId = null;
+
+    appointmentForm.reset();
+
+    appointmentSubmitButton.textContent = "Reservar turno";
+    cancelEditButton.classList.add("hidden");
+
+    appointmentMessage.textContent = "";
+    appointmentMessage.className = "form-message";
+
+    setMinimumDate();
+}
+
 async function cancelAppointment(id) {
-    const appointmentsMessage = document.getElementById("appointmentsMessage");
+    const confirmCancel = confirm("¿Seguro que querés cancelar este turno?");
+
+    if (!confirmCancel) {
+        return;
+    }
 
     try {
-        const response = await fetch(`/api/appointments/${id}/cancel`, {
+        const response = await fetch(`${API_APPOINTMENTS}/${id}/cancel`, {
             method: "PUT"
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.message || "No se pudo cancelar el turno");
+            const errorMessage = await getErrorMessage(response);
+            throw new Error(errorMessage);
         }
 
-        await loadAppointments(false);
-
         showMessage(appointmentsMessage, "Turno cancelado correctamente", "success");
+
+        if (editingAppointmentId === id) {
+            resetAppointmentFormMode();
+        }
+
+        await loadAppointments();
 
     } catch (error) {
         showMessage(appointmentsMessage, error.message, "error");
     }
 }
 
+function renderEmptyAppointments() {
+    const item = document.createElement("li");
+    item.classList.add("empty-appointments");
+
+    item.innerHTML = `
+        <div class="empty-icon">🗓️</div>
+        <strong>No hay turnos para mostrar</strong>
+        <span>Cuando reserves un turno, aparecerá en esta sección.</span>
+    `;
+
+    appointmentsList.appendChild(item);
+}
+
+async function getErrorMessage(response) {
+    try {
+        const errorData = await response.json();
+
+        if (errorData.message) {
+            return errorData.message;
+        }
+
+        if (errorData.error) {
+            return errorData.error;
+        }
+
+        return "No se pudo procesar la operación";
+
+    } catch (error) {
+        return "No se pudo procesar la operación";
+    }
+}
+
 function showMessage(element, message, type) {
     element.textContent = message;
     element.className = `form-message ${type}`;
-}
-
-function clearMessage(element) {
-    element.textContent = "";
-    element.className = "form-message";
-}
-
-function getTodayLocalDate() {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-}
-
-function getCurrentLocalTime() {
-    const now = new Date();
-
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-
-    return `${hours}:${minutes}`;
-}
-
-function formatDate(date) {
-    if (!date) {
-        return "";
-    }
-
-    const parts = date.split("-");
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-}
-
-function formatTime(time) {
-    if (!time) {
-        return "";
-    }
-
-    return time.substring(0, 5);
 }
 
 function getStatusLabel(status) {
@@ -421,6 +427,48 @@ function getStatusLabel(status) {
         return "Cancelado";
     }
 
+    if (status === "FINISHED") {
+        return "Finalizado";
+    }
+
     return status;
+}
+
+function getStatusClass(status) {
+    if (status === "ACTIVE") {
+        return "active";
+    }
+
+    if (status === "CANCELLED") {
+        return "cancelled";
+    }
+
+    if (status === "FINISHED") {
+        return "finished";
+    }
+
+    return "";
+}
+
+function formatDate(date) {
+    if (!date) {
+        return "-";
+    }
+
+    const parts = date.split("-");
+
+    if (parts.length !== 3) {
+        return date;
+    }
+
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+function formatTime(time) {
+    if (!time) {
+        return "-";
+    }
+
+    return time.substring(0, 5);
 }
 

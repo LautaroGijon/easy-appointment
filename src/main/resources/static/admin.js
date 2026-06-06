@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const serviceForm = document.getElementById("serviceForm");
     const professionalForm = document.getElementById("professionalForm");
     const appointmentStatusFilter = document.getElementById("appointmentStatusFilter");
-    welcomeMessage.textContent = `Bienvenido, ${loggedUser.name}`;
+    welcomeMessage.textContent = `Bienvenido, ${loggedUser.name || loggedUser.fullName || "Administrador"}`;
 
     logoutButton.addEventListener("click", function () {
         localStorage.removeItem("loggedUser");
@@ -416,7 +416,7 @@ function renderAllAppointments(appointments) {
         const row = document.createElement("tr");
 
         const clientName = appointment.client
-            ? appointment.client.name
+            ? appointment.client.name || appointment.client.fullName || "Sin cliente"
             : "Sin cliente";
 
         const serviceName = appointment.offeredService
@@ -467,19 +467,21 @@ async function cancelAppointmentAsAdmin(id) {
 
     try {
         const response = await fetch(`/api/appointments/${id}/cancel`, {
-            method: "PUT"
-        });
+    method: "PUT"
+});
 
+if (!response.ok) {
+    let errorMessage = "No se pudo cancelar el turno";
+
+    try {
         const data = await response.json();
+        errorMessage = data.message || errorMessage;
+    } catch (error) {
+        // Si el backend no devuelve JSON, dejamos el mensaje genérico.
+    }
 
-        if (!response.ok) {
-            throw new Error(data.message || "No se pudo cancelar el turno");
-        }
-
-        await loadAllAppointments(false);
-
-        showMessage(appointmentsMessage, "Turno cancelado correctamente", "success");
-
+    throw new Error(errorMessage);
+}
     } catch (error) {
         showMessage(appointmentsMessage, error.message, "error");
     }

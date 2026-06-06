@@ -1,8 +1,9 @@
 package pnt.project.easy.appointment.service;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.time.LocalTime;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -51,7 +52,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Appointment create(AppointmentCreateRequest request) {
 
-    	validateDateAndTimeAreNotPast(request.getDate(), request.getTime());
+        validateDateAndTimeAreNotPast(request.getDate(), request.getTime());
 
         User client = findClientById(request.getClientId());
         Professional professional = findProfessionalById(request.getProfessionalId());
@@ -60,7 +61,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         validateProfessionalAvailability(
                 professional,
                 request.getDate(),
-                request.getTime()
+                request.getTime(),
+                offeredService
         );
 
         Appointment appointment = new Appointment();
@@ -82,7 +84,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointment.getStatus() != AppointmentStatus.ACTIVE) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Only active appointments can be updated"
+                    "Solo se pueden modificar turnos activos"
             );
         }
 
@@ -91,20 +93,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         Professional professional = findProfessionalById(request.getProfessionalId());
         OfferedService offeredService = findOfferedServiceById(request.getServiceId());
 
-        boolean appointmentExists = appointmentRepository.existsByProfessionalAndDateAndTimeAndStatusAndIdNot(
+        validateProfessionalAvailabilityForUpdate(
                 professional,
                 request.getDate(),
                 request.getTime(),
-                AppointmentStatus.ACTIVE,
+                offeredService,
                 id
         );
-
-        if (appointmentExists) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Professional already has an active appointment at this date and time"
-            );
-        }
 
         appointment.setDate(request.getDate());
         appointment.setTime(request.getTime());
@@ -122,7 +117,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Appointment is already cancelled"
+                    "El turno ya se encuentra cancelado"
             );
         }
 
@@ -133,7 +128,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public void delete(Long id) {
+
         Appointment appointment = findAppointmentById(id);
+
         appointmentRepository.delete(appointment);
     }
 
@@ -141,7 +138,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Appointment not found"
+                        "Turno no encontrado"
                 ));
     }
 
@@ -149,7 +146,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return professionalRepository.findById(professionalId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Professional not found"
+                        "Profesional no encontrado"
                 ));
     }
 
@@ -157,21 +154,22 @@ public class AppointmentServiceImpl implements AppointmentService {
         return offeredServiceRepository.findById(serviceId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Service not found"
+                        "Servicio no encontrado"
                 ));
     }
 
     private User findClientById(Long clientId) {
+
         User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Client not found"
+                        "Cliente no encontrado"
                 ));
 
         if (client.getRole() != UserRole.CLIENT) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "User must have CLIENT role to create an appointment"
+                    "El usuario debe tener rol CLIENTE para crear un turno"
             );
         }
 
@@ -179,10 +177,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     private void validateDateAndTimeAreNotPast(LocalDate date, LocalTime time) {
+
         if (date.isBefore(LocalDate.now())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Appointment date cannot be in the past"
+                    "La fecha del turno no puede estar en el pasado"
             );
         }
 
@@ -191,27 +190,64 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (date.isEqual(LocalDate.now()) && time.isBefore(currentTime)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Appointment time cannot be in the past"
+                    "La hora del turno no puede estar en el pasado"
             );
         }
     }
 
     private void validateProfessionalAvailability(Professional professional,
                                                   LocalDate date,
-                                                  java.time.LocalTime time) {
+                                                  LocalTime startTime,
+                                                  OfferedService newService) {
 
-        boolean appointmentExists = appointmentRepository.existsByProfessionalAndDateAndTimeAndStatus(
+        List<Appointment> activeAppointments = appointmentRepository.findByProfessionalAndDateAndStatus(
                 professional,
                 date,
-                time,
                 AppointmentStatus.ACTIVE
         );
 
-        if (appointmentExists) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Professional already has an active appointment at this date and time"
+        validateTimeOverlap(activeAppointments, startTime, newService);
+    }
+
+    private void validateProfessionalAvailabilityForUpdate(Professional professional,
+                                                           LocalDate date,
+                                                           LocalTime startTime,
+                                                           OfferedService newService,
+                                                           Long appointmentId) {
+
+        List<Appointment> activeAppointments = appointmentRepository.findByProfessionalAndDateAndStatusAndIdNot(
+                professional,
+                date,
+                AppointmentStatus.ACTIVE,
+                appointmentId
+        );
+
+        validateTimeOverlap(activeAppointments, startTime, newService);
+    }
+
+    private void validateTimeOverlap(List<Appointment> activeAppointments,
+                                     LocalTime newStartTime,
+                                     OfferedService newService) {
+
+        LocalTime newEndTime = newStartTime.plusMinutes(newService.getDurationMinutes());
+
+        for (Appointment existingAppointment : activeAppointments) {
+
+            LocalTime existingStartTime = existingAppointment.getTime();
+
+            LocalTime existingEndTime = existingStartTime.plusMinutes(
+                    existingAppointment.getOfferedService().getDurationMinutes()
             );
+
+            boolean overlaps = newStartTime.isBefore(existingEndTime)
+                    && newEndTime.isAfter(existingStartTime);
+
+            if (overlaps) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "El profesional ya tiene un turno activo en ese rango horario"
+                );
+            }
         }
     }
 }
