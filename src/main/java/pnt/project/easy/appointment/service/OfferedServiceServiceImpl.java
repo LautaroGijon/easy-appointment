@@ -56,7 +56,7 @@ public class OfferedServiceServiceImpl implements OfferedServiceService {
         if (hasAppointments) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Service cannot be deleted because it has appointments assigned"
+                    "No se puede eliminar el servicio porque tiene turnos asociados"
             );
         }
 
