@@ -19,6 +19,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const serviceForm = document.getElementById("serviceForm");
     const professionalForm = document.getElementById("professionalForm");
     const appointmentStatusFilter = document.getElementById("appointmentStatusFilter");
+    const appointmentProfessionalFilter = document.getElementById("appointmentProfessionalFilter");
+    const appointmentServiceFilter = document.getElementById("appointmentServiceFilter");
+    const appointmentDateFilter = document.getElementById("appointmentDateFilter");
+    const appointmentSearchInput = document.getElementById("appointmentSearchInput");
+    const clearAppointmentFiltersButton = document.getElementById("clearAppointmentFiltersButton");
     welcomeMessage.textContent = `Bienvenido, ${loggedUser.name || loggedUser.fullName || "Administrador"}`;
 
     logoutButton.addEventListener("click", function () {
@@ -29,7 +34,20 @@ document.addEventListener("DOMContentLoaded", function () {
     serviceForm.addEventListener("submit", createService);
     professionalForm.addEventListener("submit", createProfessional);
     appointmentStatusFilter.addEventListener("change", renderFilteredAppointments);
+    appointmentProfessionalFilter.addEventListener("change", renderFilteredAppointments);
+    appointmentServiceFilter.addEventListener("change", renderFilteredAppointments);
+    appointmentDateFilter.addEventListener("change", renderFilteredAppointments);
+    appointmentSearchInput.addEventListener("input", renderFilteredAppointments);
 
+clearAppointmentFiltersButton.addEventListener("click", function () {
+    appointmentStatusFilter.value = "ALL";
+    appointmentProfessionalFilter.value = "ALL";
+    appointmentServiceFilter.value = "ALL";
+    appointmentDateFilter.value = "";
+    appointmentSearchInput.value = "";
+
+    renderFilteredAppointments();
+});
     loadServices();
     loadProfessionals();
     loadAllAppointments();
@@ -385,7 +403,8 @@ async function loadAllAppointments(showLoading = true) {
         const appointments = await response.json();
 
         allAppointments = appointments;
-
+        
+        loadAppointmentFilterOptions(allAppointments);
         updateAppointmentCounters(allAppointments);
         renderFilteredAppointments();
 
@@ -396,6 +415,42 @@ async function loadAllAppointments(showLoading = true) {
     } catch (error) {
         showMessage(appointmentsMessage, error.message, "error");
     }
+}
+
+function loadAppointmentFilterOptions(appointments) {
+    const appointmentProfessionalFilter = document.getElementById("appointmentProfessionalFilter");
+    const appointmentServiceFilter = document.getElementById("appointmentServiceFilter");
+
+    const professionalsMap = new Map();
+    const servicesMap = new Map();
+
+    appointments.forEach(function (appointment) {
+        if (appointment.professional) {
+            const professionalName = `${appointment.professional.firstName} ${appointment.professional.lastName}`;
+            professionalsMap.set(appointment.professional.id, professionalName);
+        }
+
+        if (appointment.offeredService) {
+            servicesMap.set(appointment.offeredService.id, appointment.offeredService.name);
+        }
+    });
+
+    appointmentProfessionalFilter.innerHTML = `<option value="ALL">Todos</option>`;
+    appointmentServiceFilter.innerHTML = `<option value="ALL">Todos</option>`;
+
+    professionalsMap.forEach(function (name, id) {
+        const option = document.createElement("option");
+        option.value = id;
+        option.textContent = name;
+        appointmentProfessionalFilter.appendChild(option);
+    });
+
+    servicesMap.forEach(function (name, id) {
+        const option = document.createElement("option");
+        option.value = id;
+        option.textContent = name;
+        appointmentServiceFilter.appendChild(option);
+    });
 }
 
 function renderAllAppointments(appointments) {
@@ -467,21 +522,26 @@ async function cancelAppointmentAsAdmin(id) {
 
     try {
         const response = await fetch(`/api/appointments/${id}/cancel`, {
-    method: "PUT"
-});
+            method: "PUT"
+        });
 
-if (!response.ok) {
-    let errorMessage = "No se pudo cancelar el turno";
+        if (!response.ok) {
+            let errorMessage = "No se pudo cancelar el turno";
 
-    try {
-        const data = await response.json();
-        errorMessage = data.message || errorMessage;
-    } catch (error) {
-        // Si el backend no devuelve JSON, dejamos el mensaje genérico.
-    }
+            try {
+                const data = await response.json();
+                errorMessage = data.message || errorMessage;
+            } catch (error) {
+                // Si el backend no devuelve JSON, dejamos el mensaje genérico.
+            }
 
-    throw new Error(errorMessage);
-}
+            throw new Error(errorMessage);
+        }
+
+        await loadAllAppointments(false);
+
+        showMessage(appointmentsMessage, "Turno cancelado correctamente", "success");
+
     } catch (error) {
         showMessage(appointmentsMessage, error.message, "error");
     }
@@ -516,14 +576,51 @@ function formatTime(time) {
 
 function renderFilteredAppointments() {
     const appointmentStatusFilter = document.getElementById("appointmentStatusFilter");
+    const appointmentProfessionalFilter = document.getElementById("appointmentProfessionalFilter");
+    const appointmentServiceFilter = document.getElementById("appointmentServiceFilter");
+    const appointmentDateFilter = document.getElementById("appointmentDateFilter");
+    const appointmentSearchInput = document.getElementById("appointmentSearchInput");
 
-    let filteredAppointments = allAppointments;
+    const selectedStatus = appointmentStatusFilter.value;
+    const selectedProfessionalId = appointmentProfessionalFilter.value;
+    const selectedServiceId = appointmentServiceFilter.value;
+    const selectedDate = appointmentDateFilter.value;
+    const searchText = appointmentSearchInput.value.trim().toLowerCase();
 
-    if (appointmentStatusFilter.value !== "ALL") {
-        filteredAppointments = allAppointments.filter(function (appointment) {
-            return appointment.status === appointmentStatusFilter.value;
-        });
-    }
+    const filteredAppointments = allAppointments.filter(function (appointment) {
+        const matchesStatus =
+            selectedStatus === "ALL" || appointment.status === selectedStatus;
+
+        const matchesProfessional =
+            selectedProfessionalId === "ALL" ||
+            (appointment.professional && String(appointment.professional.id) === selectedProfessionalId);
+
+        const matchesService =
+            selectedServiceId === "ALL" ||
+            (appointment.offeredService && String(appointment.offeredService.id) === selectedServiceId);
+
+        const matchesDate =
+            selectedDate === "" || appointment.date === selectedDate;
+
+        const clientName = appointment.client
+            ? appointment.client.name || appointment.client.fullName || ""
+            : "";
+
+        const matchesClient =
+            searchText === "" || clientName.toLowerCase().includes(searchText);
+
+        return matchesStatus
+            && matchesProfessional
+            && matchesService
+            && matchesDate
+            && matchesClient;
+    });
+
+    filteredAppointments.sort(function (a, b) {
+        const dateTimeA = `${a.date} ${formatTime(a.time)}`;
+        const dateTimeB = `${b.date} ${formatTime(b.time)}`;
+        return dateTimeA.localeCompare(dateTimeB);
+    });
 
     renderAllAppointments(filteredAppointments);
 }

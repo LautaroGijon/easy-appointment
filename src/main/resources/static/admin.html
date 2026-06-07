@@ -99,17 +99,47 @@
         </section>
 
         <section id="appointmentsPanel" class="admin-section-panel">
-            <section class="page-title-row agenda-header-row">
+            <section class="page-title-row agenda-title-row">
                 <h2>Agenda general</h2>
+            </section>
 
+            <section class="agenda-filters app-card">
                 <div class="filter-group">
-                    <label for="appointmentStatusFilter">Filtrar por estado</label>
+                    <label for="appointmentStatusFilter">Estado</label>
                     <select id="appointmentStatusFilter">
                         <option value="ALL">Todos</option>
                         <option value="ACTIVE">Activos</option>
                         <option value="CANCELLED">Cancelados</option>
                     </select>
                 </div>
+
+                <div class="filter-group">
+                    <label for="appointmentProfessionalFilter">Profesional</label>
+                    <select id="appointmentProfessionalFilter">
+                        <option value="ALL">Todos</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="appointmentServiceFilter">Servicio</label>
+                    <select id="appointmentServiceFilter">
+                        <option value="ALL">Todos</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="appointmentDateFilter">Fecha</label>
+                    <input type="date" id="appointmentDateFilter">
+                </div>
+
+                <div class="filter-group">
+                    <label for="appointmentSearchInput">Buscar cliente</label>
+                    <input type="text" id="appointmentSearchInput" placeholder="Nombre del cliente">
+                </div>
+
+                <button type="button" id="clearAppointmentFiltersButton" class="secondary-button">
+                    Limpiar filtros
+                </button>
             </section>
 
             <section class="app-card agenda-card">
@@ -128,8 +158,7 @@
                                 <th>Acción</th>
                             </tr>
                         </thead>
-                        <tbody id="appointmentsTableBody">
-                        </tbody>
+                        <tbody id="appointmentsTableBody"></tbody>
                     </table>
                 </div>
             </section>
