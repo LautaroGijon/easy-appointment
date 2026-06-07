@@ -91,5 +91,8 @@ public class Appointment {
         this.offeredService = offeredService;
     }
     
+    public void cancel() {
+        this.status = AppointmentStatus.CANCELLED;
+    }
     
 }

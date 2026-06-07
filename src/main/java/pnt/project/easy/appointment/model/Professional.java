@@ -53,4 +53,12 @@ public class Professional {
     public void setActive(Boolean active) {
         this.active = active;
     }
+    public void activate() {
+        this.active = true;
+    }
+    
+    public void deactivate() {
+        this.active = false;
+    }
+    
 }

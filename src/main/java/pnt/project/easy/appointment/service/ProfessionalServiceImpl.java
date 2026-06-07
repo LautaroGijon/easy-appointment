@@ -73,7 +73,7 @@ public class ProfessionalServiceImpl implements ProfessionalService {
             );
         }
 
-        professional.setActive(false);
+        professional.deactivate();
         professionalRepository.save(professional);
     }
 

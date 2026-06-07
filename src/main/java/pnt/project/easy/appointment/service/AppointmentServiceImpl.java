@@ -121,7 +121,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             );
         }
 
-        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointment.cancel();
 
         return appointmentRepository.save(appointment);
     }
